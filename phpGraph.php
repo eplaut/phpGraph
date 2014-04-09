@@ -19,6 +19,13 @@
 # @version    1.1
 #
 # ------------------- END LICENSE BLOCK -------------------
+
+/** PHPExcel root directory */
+if (!defined('PHPGRAPH_ROOT')) {
+    define('PHPGRAPH_ROOT', dirname(__FILE__) . '/');
+    require_once(PHPGRAPH_ROOT . 'phpGraph/Autoloader.php');
+}
+
 class phpGraph {
 
 	public $options = array(
@@ -1227,19 +1234,19 @@ class phpGraph {
 		$val = array("0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F");
 		shuffle($val);
 		$rand = array_rand($val,6);
-		$hexa = '';
+            $hexa = '';
 		foreach ($rand as $key => $keyOfVal) {
 			$hexa .= $val[$keyOfVal];
-		}
-		if ('#'.$hexa == $this->options['background']) {
-			return $this->__genColor();
-		}
-		if (!in_array($hexa, $this->colors)) {
-			$this->colors[] = $hexa;
-			return '#'.$hexa;
-		} else {
-			return $this->__genColor();
-		}
+            }
+            if ('#'.$hexa == $this->options['background']) {
+                return $this->__genColor();
+            }
+            if (!in_array($hexa, $this->colors)) {
+                $this->colors[] = $hexa;
+                return '#'.$hexa;
+            } else {
+                return $this->__genColor();
+            }
 	}
         
 }
