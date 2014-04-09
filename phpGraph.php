@@ -1241,5 +1241,5 @@ class phpGraph {
 			return $this->__genColor();
 		}
 	}
+        
 }
-?>
