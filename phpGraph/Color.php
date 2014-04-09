@@ -1,6 +1,41 @@
 <?php
     
 class phpGraph_Color {
+    static private $_colors = array();
+    
+    static private $_background = null;
+    
+    /**
+     * To generate hexadecimal code for color
+     * @param null
+     * @return string hexadecimal code
+     *
+     * @author Cyril MAGUIRE
+     */
+    static public function genColor() {
+        $rgbArray = phpGraph_Color::hslToRgb(rand(0, 255), rand(80, 100), rand(50, 70));
+        $hexa = '';
+        foreach ($rgbArray as $val) {
+            $hexa .= sprintf("%02x", $val);
+        }
+        if ('#' . $hexa == self::$_background) {
+            return self::genColor();
+        }
+        if (!in_array($hexa, self::$_colors)) {
+            self::$_colors[] = $hexa;
+            return '#' . $hexa;
+        } else {
+            return self::genColor();
+        }
+    }
+    
+    static function setBackgroundColor($background) {
+        self::$_background = $background;
+    }
+    
+    static function setColors($colors) {
+        self::$_colors = (is_array($colors)) ? $colors : array($colors);
+    }
     
     static function rgbToHsl( $r, $g, $b ) {
         $r /= 255;
