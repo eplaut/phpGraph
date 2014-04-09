@@ -1231,12 +1231,10 @@ class phpGraph {
 	 * @author Cyril MAGUIRE
 	 */
 	public function __genColor() {
-		$val = array("0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F");
-		shuffle($val);
-		$rand = array_rand($val,6);
+            $rgbArray = phpGraph_Color::hslToRgb(rand(0,255), rand(80,100), rand(50,70));
             $hexa = '';
-		foreach ($rand as $key => $keyOfVal) {
-			$hexa .= $val[$keyOfVal];
+            foreach ($rgbArray as $val) {
+                $hexa .= sprintf("%02x", $val);
             }
             if ('#'.$hexa == $this->options['background']) {
                 return $this->__genColor();
