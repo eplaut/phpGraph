@@ -21,29 +21,14 @@ class phpGraph_Render_Stock {
      * @author Cyril MAGUIRE
      */
     static public function draw($data, $height, $HEIGHT, $stepX, $unitY, $lenght, $min, $max, $options, $i, $labels, $id) {
-        $error = null;
-        if (!isset($data[$labels[$i]]['open'])) {
-            $error[] = 'open';
-        }
-        if (!isset($data[$labels[$i]]['close'])) {
-            $error[] = 'close';
-        }
-        if (!isset($data[$labels[$i]]['max'])) {
-            $error[] = 'max';
-        }
-        if (!isset($data[$labels[$i]]['min'])) {
-            $error[] = 'min';
-        }
-        if ($error) {
+        $errors = self::_validateInput($data, $height, $HEIGHT, $stepX, $unitY, $lenght, $min, $max, $options, $i, $labels, $id);
+        if (!empty($errors)) {
             $return = "\t\t" . '<path id="chemin" d="M ' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $height + 10) . ' V ' . $height . '" class="graph-line" stroke="transparent" fill="#fff" fill-opacity="0"/>' . "\n";
             $return .= "\t\t" . '<text><textPath xlink:href="#chemin">Error : "';
-            foreach ($error as $key => $value) {
-                $return .= $value . (count($error) > 1 ? ' ' : '');
-            }
+            $return .= implode(' ', $errors);
             $return .= '" missing</textPath></text>' . "\n";
             return $return;
         }
-//        $options = array_merge($this->options, $options);
 
         extract($options);
 
@@ -81,4 +66,20 @@ class phpGraph_Render_Stock {
         return $return;
     }
 
+    static private function _validateInput($data, $height, $HEIGHT, $stepX, $unitY, $lenght, $min, $max, $options, $i, $labels, $id) {
+        $errors = array();
+        if (!isset($data[$labels[$i]]['open'])) {
+            $errors[] = 'open';
+        }
+        if (!isset($data[$labels[$i]]['close'])) {
+            $errors[] = 'close';
+        }
+        if (!isset($data[$labels[$i]]['max'])) {
+            $errors[] = 'max';
+        }
+        if (!isset($data[$labels[$i]]['min'])) {
+            $errors[] = 'min';
+        }
+        return $errors;
+    }    
 }
