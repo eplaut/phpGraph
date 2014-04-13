@@ -56,6 +56,8 @@ class phpGraph {
         'responsive' => true, // (bool) to avoid svg to be responsive (dimensions fixed)
     );
     public $colors = array();
+    
+    private $_render;
 
     /**
      * Constructor
@@ -83,6 +85,8 @@ class phpGraph {
         if (is_string($this->options['type'])) {
             $this->options['type'] = array(0 => $this->options['type']);
         }
+        
+        $this->_render = new phpGraph_Render();
     }
 
     /**
@@ -94,14 +98,12 @@ class phpGraph {
      * @author Cyril MAGUIRE
      */
     public function draw($data, $options = array(), $output = "php://stdout") {
-        $return = '';
-
         //We add 10 units in viewbox to display x legend correctly
         $options['paddingLegendX'] = 10;
 
         $options = array_merge($this->options, $options);
         
-        $return = phpGraph_Render::render($data, $options);
+        $return = $this->_render->render($data, $options);
 
         $this->colors = array();
         return $return;

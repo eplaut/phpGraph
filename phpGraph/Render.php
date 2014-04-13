@@ -1,7 +1,7 @@
 <?php
 
-abstract class phpGraph_Render {
-    static function render(array $data, array $options = array()) {
+class phpGraph_Render {
+    function render(array $data, array $options = array()) {
         $return = '';
         extract($options);
 
