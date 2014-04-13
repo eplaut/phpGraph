@@ -106,4 +106,32 @@ class phpGraph_Color {
         return $ret;
     }
     
+    static public function getBrighterColor($color, $percent) {
+        $brightColor = '#';
+        $brightColor .= self::_changeColor(substr($color, 1, 2), $percent, 'light');
+        $brightColor .= self::_changeColor(substr($color, 3, 2), $percent, 'light');
+        $brightColor .= self::_changeColor(substr($color, 5, 2), $percent, 'light');
+        return $brightColor;
+    }
+    
+    static public function getDarkerColor($color, $percent) {
+        $darkColor = '#';
+        $darkColor .= self::_changeColor(substr($color, 1, 2), $percent, 'dark');
+        $darkColor .= self::_changeColor(substr($color, 3, 2), $percent, 'dark');
+        $darkColor .= self::_changeColor(substr($color, 5, 2), $percent, 'dark');
+        return $darkColor;
+    }
+    
+    static private function _changeColor($color, $percent, $direction) {
+        $decColor = hexdec($color);
+        switch ($direction) {
+            case 'light':
+                $decReturn = floor((255 - $decColor) * $percent / 100) + $decColor;
+                break;
+            case 'dark':
+                $decReturn = ceil($decColor * (100 - $percent) / 100);
+                break;
+        }
+        return dechex($decReturn);
+    }
 }

@@ -21,7 +21,7 @@ class phpGraph_Render_Stock {
      * @author Cyril MAGUIRE
      */
     static public function draw($data, $height, $HEIGHT, $stepX, $unitY, $lenght, $min, $max, $options, $i, $labels, $id) {
-        $errors = self::_validateInput($data, $height, $HEIGHT, $stepX, $unitY, $lenght, $min, $max, $options, $i, $labels, $id);
+        $errors = self::_validateInput($data, $i, $labels);
         if (!empty($errors)) {
             $return = "\t\t" . '<path id="chemin" d="M ' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $height + 10) . ' V ' . $height . '" class="graph-line" stroke="transparent" fill="#fff" fill-opacity="0"/>' . "\n";
             $return .= "\t\t" . '<text><textPath xlink:href="#chemin">Error : "';
@@ -31,55 +31,78 @@ class phpGraph_Render_Stock {
         }
 
         extract($options);
-
+        
+        $openPrice = $data[$labels[$i]]['open'];
+        $closePrice = $data[$labels[$i]]['close'];
+        $minPrice = $data[$labels[$i]]['min'];
+        $maxPrice = $data[$labels[$i]]['max'];
+        $minOpenClosePrice = min($openPrice, $closePrice);
+        $maxOpenClosePrice = max($openPrice, $closePrice);
         $return = '';
-        if ($data[$labels[$i]]['close'] < $data[$labels[$i]]['open']) {
-            $return .= "\n\t" . '<rect x="' . ($i * $stepX + 50 - $stepX / 4) . '" y="' . ($HEIGHT - $unitY * $data[$labels[$i]]['open']) . '" width="' . ($stepX / 2) . '" height="' . ($unitY * $data[$labels[$i]]['open'] - ($unitY * $data[$labels[$i]]['close'])) . '" class="graph-bar" fill="' . $stroke . '" fill-opacity="1"/>';
-        }
-        if ($data[$labels[$i]]['close'] == $data[$labels[$i]]['open']) {
-            $return .= "\n\t" . '<path d="M' . ($i * $stepX + 50 + 5) . ' ' . ($HEIGHT - $unitY * $data[$labels[$i]]['open']) . ' l -5 -5, -5 5, 5 5 z" class="graph-line" stroke="' . $stroke . '" fill="' . $stroke . '" fill-opacity="1"/>';
+        if ($closePrice < $openPrice) {
+            $direction = 'down';
+        } elseif ($closePrice > $openPrice) {
+            $direction = 'up';
+        } 
+        if ($closePrice == $openPrice) {
+            $return .= "\n\t" . '<path d="M' . ($i * $stepX + 50 + 5) . ' ' . ($HEIGHT - $unitY * $openPrice) . ' l -5 -5, -5 5, 5 5 z" class="graph-line" stroke="' . $stroke . '" fill="' . $stroke . '" fill-opacity="1"/>';
+        } else {
+            $return .= self::_addGradient($i, $stroke, $direction);
+            $return .= "\n\t" . '<rect x="' . ($i * $stepX + 50 - $stepX / 4) . '" y="' . ($HEIGHT - $unitY * $maxOpenClosePrice) . '" width="' . ($stepX / 2) . '" height="' . ($unitY * ($maxOpenClosePrice - $minOpenClosePrice)) . '" class="graph-bar" fill="url(#Gradient' . $i . ')" fill-opacity="1"/>';
         }
         //Limit Up
-        $return .= "\n\t" . '<path d="M' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $unitY * $data[$labels[$i]]['close']) . '  L' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $unitY * $data[$labels[$i]]['max']) . ' " class="graph-line" stroke="' . $stroke . '" fill="#fff" fill-opacity="0"/>';
-        $return .= '<use xlink:href="#plotLimit' . $id . '" transform="translate(' . ($i * $stepX + 50 - 5) . ',' . ($HEIGHT - $unitY * $data[$labels[$i]]['max']) . ')"/>';
+        $return .= "\n\t" . '<path d="M' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $unitY * $maxOpenClosePrice) . '  L' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $unitY * $maxPrice) . ' " class="graph-line" stroke="' . $stroke . '" fill="#fff" fill-opacity="0"/>';
+        $return .= '<use xlink:href="#plotLimit' . $id . '" transform="translate(' . ($i * $stepX + 50 - 5) . ',' . ($HEIGHT - $unitY * $maxPrice) . ')"/>';
         //Limit Down
-        $return .= "\n\t" . '<path d="M' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $unitY * $data[$labels[$i]]['open']) . '  L' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $unitY * $data[$labels[$i]]['min']) . ' " class="graph-line" stroke="' . $stroke . '" fill="#fff" fill-opacity="0"/>';
-        $return .= '<use xlink:href="#plotLimit' . $id . '" transform="translate(' . ($i * $stepX + 50 - 5) . ',' . ($HEIGHT - $unitY * $data[$labels[$i]]['min']) . ')"/>';
+        $return .= "\n\t" . '<path d="M' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $unitY * $minOpenClosePrice) . '  L' . ($i * $stepX + 50) . ' ' . ($HEIGHT - $unitY * $minPrice) . ' " class="graph-line" stroke="' . $stroke . '" fill="#fff" fill-opacity="0"/>';
+        $return .= '<use xlink:href="#plotLimit' . $id . '" transform="translate(' . ($i * $stepX + 50 - 5) . ',' . ($HEIGHT - $unitY * $minPrice) . ')"/>';
         if ($tooltips == true) {
             //Open
             $return .= "\n\t\t" . '<g class="graph-active">';
-            $return .= "\n\t\t\t" . '<circle cx="' . ($i * $stepX + 50) . '" cy="' . ($HEIGHT - $unitY * $data[$labels[$i]]['open']) . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
-            $return .= "\n\t" . '<title class="graph-tooltip">' . $data[$labels[$i]]['open'] . '</title>' . "\n\t\t" . '</g>';
+            $return .= "\n\t\t\t" . '<circle cx="' . ($i * $stepX + 50) . '" cy="' . ($HEIGHT - $unitY * $openPrice) . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
+            $return .= "\n\t\t\t" . '<title class="graph-tooltip">' . $openPrice . '</title>' . "\n\t\t" . '</g>';
             //Close
             $return .= "\n\t\t" . '<g class="graph-active">';
-            $return .= "\n\t\t\t" . '<circle cx="' . ($i * $stepX + 50) . '" cy="' . ($HEIGHT - $unitY * $data[$labels[$i]]['close']) . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
-            $return .= "\n\t" . '<title class="graph-tooltip">' . $data[$labels[$i]]['close'] . '</title>' . "\n\t\t" . '</g>';
+            $return .= "\n\t\t\t" . '<circle cx="' . ($i * $stepX + 50) . '" cy="' . ($HEIGHT - $unitY * $closePrice) . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
+            $return .= "\n\t\t\t" . '<title class="graph-tooltip">' . $closePrice . '</title>' . "\n\t\t" . '</g>';
             //Max
             $return .= "\n\t\t" . '<g class="graph-active">';
-            $return .= "\n\t\t\t" . '<circle cx="' . ($i * $stepX + 50) . '" cy="' . ($HEIGHT - $unitY * $data[$labels[$i]]['max']) . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
-            $return .= "\n\t" . '<title class="graph-tooltip">' . $data[$labels[$i]]['max'] . '</title>' . "\n\t\t" . '</g>';
+            $return .= "\n\t\t\t" . '<circle cx="' . ($i * $stepX + 50) . '" cy="' . ($HEIGHT - $unitY * $maxPrice) . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
+            $return .= "\n\t\t\t" . '<title class="graph-tooltip">' . $maxPrice . '</title>' . "\n\t\t" . '</g>';
             //Min
             $return .= "\n\t\t" . '<g class="graph-active">';
-            $return .= "\n\t\t\t" . '<circle cx="' . ($i * $stepX + 50) . '" cy="' . ($HEIGHT - $unitY * $data[$labels[$i]]['min']) . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
-            $return .= "\n\t" . '<title class="graph-tooltip">' . $data[$labels[$i]]['min'] . '</title>' . "\n\t\t" . '</g>';
+            $return .= "\n\t\t\t" . '<circle cx="' . ($i * $stepX + 50) . '" cy="' . ($HEIGHT - $unitY * $minPrice) . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
+            $return .= "\n\t\t\t" . '<title class="graph-tooltip">' . $minPrice . '</title>' . "\n\t\t" . '</g>';
         }
         return $return;
     }
 
-    static private function _validateInput($data, $height, $HEIGHT, $stepX, $unitY, $lenght, $min, $max, $options, $i, $labels, $id) {
+    static private function _validateInput($data, $i, $labels) {
         $errors = array();
-        if (!isset($data[$labels[$i]]['open'])) {
-            $errors[] = 'open';
-        }
-        if (!isset($data[$labels[$i]]['close'])) {
-            $errors[] = 'close';
-        }
-        if (!isset($data[$labels[$i]]['max'])) {
-            $errors[] = 'max';
-        }
-        if (!isset($data[$labels[$i]]['min'])) {
-            $errors[] = 'min';
+        $keys = array('min', 'max', 'open', 'close');
+        foreach ($keys as $key) {
+            if (!isset($data[$labels[$i]][$key])) {
+                $errors[] = $key;
+            }
         }
         return $errors;
-    }    
+    }
+    
+    static private function _addGradient($id, $color, $direction) {
+        $return = "\t<defs>";
+        switch ($direction) {
+            case 'up':
+                $return .= "\n\t\t" . '<linearGradient id="Gradient' . $id . '" x1="0" x2="0" y1="1" y2="0">';
+                break;
+            case 'down':
+                $return .= "\n\t\t" . '<linearGradient id="Gradient' . $id . '" x1="0" x2="0" y1="0" y2="1">';
+                break;
+        }
+        $return .= '
+                <stop offset="0%" stop-color="' . phpGraph_Color::getBrighterColor($color, 70) . '"/>
+                <stop offset="100%" stop-color="' . $color . '"/>
+            </linearGradient>';
+        $return .= "\n\t</defs>";
+        return $return;
+    }
 }
