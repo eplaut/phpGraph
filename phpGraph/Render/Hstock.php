@@ -73,19 +73,19 @@ class phpGraph_Render_Hstock {
             //Open
             $return .= "\n\t\t" . '<g class="graph-active">';
             $return .= "\n\t\t\t" . '<circle cx="' . ($unitX * $openPrice + 50) . '" cy="' . $stepY . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
-            $return .= "\n\t" . '<title class="graph-tooltip">' . $openPrice . '</title>' . "\n\t\t" . '</g>';
+            $return .= "\n\t" . '<title class="graph-tooltip">Open: ' . $openPrice . '</title>' . "\n\t\t" . '</g>';
             //Close
             $return .= "\n\t\t" . '<g class="graph-active">';
             $return .= "\n\t\t\t" . '<circle cx="' . ($unitX * $closePrice + 50) . '" cy="' . $stepY . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
-            $return .= "\n\t" . '<title class="graph-tooltip">' . $closePrice . '</title>' . "\n\t\t" . '</g>';
+            $return .= "\n\t" . '<title class="graph-tooltip">Close: ' . $closePrice . '</title>' . "\n\t\t" . '</g>';
             //Max
             $return .= "\n\t\t" . '<g class="graph-active">';
             $return .= "\n\t\t\t" . '<circle cx="' . ($unitX * $maxPrice + 50) . '" cy="' . $stepY . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
-            $return .= "\n\t" . '<title class="graph-tooltip">' . $maxPrice . '</title>' . "\n\t\t" . '</g>';
+            $return .= "\n\t" . '<title class="graph-tooltip">Max: ' . $maxPrice . '</title>' . "\n\t\t" . '</g>';
             //Min
             $return .= "\n\t\t" . '<g class="graph-active">';
             $return .= "\n\t\t\t" . '<circle cx="' . ($unitX * $minPrice + 50) . '" cy="' . $stepY . '" r="1" stroke="' . $stroke . '" opacity="0" class="graph-point-active"/>';
-            $return .= "\n\t" . '<title class="graph-tooltip">' . $minPrice . '</title>' . "\n\t\t" . '</g>';
+            $return .= "\n\t" . '<title class="graph-tooltip">Min: ' . $minPrice . '</title>' . "\n\t\t" . '</g>';
         }
         return $return;
     }
@@ -105,10 +105,10 @@ class phpGraph_Render_Hstock {
         $return = "\t<defs>";
         switch ($direction) {
             case 'up':
-                $return .= "\n\t\t" . '<linearGradient id="Gradient' . $id . '" x1="1" x2="0" y1="0" y2="0">';
+                $return .= "\n\t\t" . '<linearGradient id="Gradient' . $id . '" x1="0" x2="1" y1="0" y2="0">';
                 break;
             case 'down':
-                $return .= "\n\t\t" . '<linearGradient id="Gradient' . $id . '" x1="0" x2="1" y1="0" y2="0">';
+                $return .= "\n\t\t" . '<linearGradient id="Gradient' . $id . '" x1="1" x2="0" y1="0" y2="0">';
                 break;
         }
         $return .= '
